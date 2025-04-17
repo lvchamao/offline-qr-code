@@ -273,9 +273,13 @@ function resizeElements() {
     let newQrCodeSize = Math.min(qrCodeContainer.offsetHeight, qrCodeContainer.offsetWidth) - QR_CODE_CONTAINER_MARGIN;
 
     // if initial resize is needed, compute maximum allowed qr code size
+    
     if (firstResize) {
         firstResize = false;
         newQrCodeSize = Math.min(qrLastSize, MAX_WINDOW_HEIGHT - qrCodeText.offsetHeight - QR_CODE_CONTAINER_MARGIN);
+        if (newQrCodeSize < qrLastSize) {
+            CommonMessages.showWarning("qrCodeSizeTooLargeWarning", true);
+        }
     } 
 
     const qrSizeDiff = newQrCodeSize - qrLastSize;
