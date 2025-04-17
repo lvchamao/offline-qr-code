@@ -15,6 +15,11 @@ import * as PermissionRequest from "/common/modules/PermissionRequest/Permission
 import * as Colors from "/common/modules/Colors.js";
 import * as IconHandler from "/common/modules/IconHandler.js";
 
+import { MAX_WINDOW_HEIGHT, QR_CODE_CONTAINER_MARGIN } from '/popup/modules/UserInterface.js';
+const QR_CODE_TEXT_MARGIN = 96; // px, = 6em
+const SIZE_WARNING_MESSAGE_ID = "qrCodeSizeTooLarge";
+
+
 const REMEBER_SIZE_INTERVAL = 500; // sec
 const CONTRAST_MESSAGE_ID = "contrast";
 
@@ -37,6 +42,9 @@ let updateRemberedSizeInterval = null;
  * @returns {void}
  */
 function applyQrCodeSize(optionValue) {
+
+    // hide qrCodeSizeTooLarge warning message 
+    CustomMessages.hideMessage(SIZE_WARNING_MESSAGE_ID);
     const elQrCodeSize = document.getElementById("qrCodeSizeFixedValue");
 
     if (optionValue.sizeType === "fixed") {
@@ -51,6 +59,12 @@ function applyQrCodeSize(optionValue) {
 
         elQrCodeSize.value = optionValue.size;
         elQrCodeSize.removeAttribute("disabled");
+        
+        // if QR code size is larger than available space, show warning
+        if (sizeValue > MAX_WINDOW_HEIGHT - QR_CODE_CONTAINER_MARGIN - QR_CODE_TEXT_MARGIN) {
+            CustomMessages.setMessageDesign(SIZE_WARNING_MESSAGE_ID, MESSAGE_LEVEL.WARN);
+            CustomMessages.showMessage(SIZE_WARNING_MESSAGE_ID, "qrCodeSizeTooLargeWarning", false);
+        }
     } else {
         // disable input of number when remember option is selected
         elQrCodeSize.setAttribute("disabled", "");
@@ -294,6 +308,7 @@ function applyClipboardContent(optionValue, event={}) {
 export async function registerTrigger() {
     // register custom message
     CustomMessages.registerMessageType(CONTRAST_MESSAGE_ID, document.getElementById("messageContrast"));
+    CustomMessages.registerMessageType(SIZE_WARNING_MESSAGE_ID, document.getElementById("messageQrCodeSize"));
 
     // register triggers
     AutomaticSettings.Trigger.registerSave("qrCodeSize", applyQrCodeSize);
